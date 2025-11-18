@@ -1,11 +1,49 @@
 {
   "version": 3,
   "targets": {
-    "net10.0": {}
+    "net10.0": {
+      "Ridged.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "Ridged.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Ridged.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Ridged.Application.dll": {}
+        }
+      },
+      "Ridged.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/Ridged.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Ridged.Domain.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "Ridged.Application/1.0.0": {
+      "type": "project",
+      "path": "../Ridged.Application/Ridged.Application.csproj",
+      "msbuildProject": "../Ridged.Application/Ridged.Application.csproj"
+    },
+    "Ridged.Domain/1.0.0": {
+      "type": "project",
+      "path": "../Ridged.Domain/Ridged.Domain.csproj",
+      "msbuildProject": "../Ridged.Domain/Ridged.Domain.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net10.0": []
+    "net10.0": [
+      "Ridged.Application >= 1.0.0",
+      "Ridged.Domain >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\DELL\\.nuget\\packages\\": {},
@@ -38,7 +76,14 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "E:\\Ridged-BE\\Ridged.Application\\Ridged.Application.csproj": {
+              "projectPath": "E:\\Ridged-BE\\Ridged.Application\\Ridged.Application.csproj"
+            },
+            "E:\\Ridged-BE\\Ridged.Domain\\Ridged.Domain.csproj": {
+              "projectPath": "E:\\Ridged-BE\\Ridged.Domain\\Ridged.Domain.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
