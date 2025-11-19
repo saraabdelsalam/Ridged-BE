@@ -48,6 +48,13 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Seed roles on application startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await Ridged.Infrastructure.Extensions.RoleSeeder.SeedRolesAsync(services);
+}
+
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {

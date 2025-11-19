@@ -44,7 +44,9 @@ namespace Ridged.Infrastructure.Extensions
             })
             .AddRoles<IdentityRole<int>>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddUserManager<UserManager<User>>()
+            .AddRoleManager<RoleManager<IdentityRole<int>>>();
 
             // Register password hasher
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

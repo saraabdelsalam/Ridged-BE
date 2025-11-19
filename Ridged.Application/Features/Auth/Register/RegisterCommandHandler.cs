@@ -11,21 +11,18 @@ namespace Ridged.Application.Features.Auth.Register
 {
     public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<RegisterResponse>>
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly UserManager<User> _userManager;
 
-        public RegisterCommandHandler(
-            IUserRepository userRepository,
-            IPasswordHasher<User> passwordHasher)
+        public RegisterCommandHandler(UserManager<User> userManager)
         {
-            _userRepository = userRepository;
-            _passwordHasher = passwordHasher;
+            _userManager = userManager;
         }
 
         public async Task<Result<RegisterResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             // Check if email already exists
-            if (await _userRepository.EmailExistsAsync(request.Email, cancellationToken))
+            var existingUser = await _userManager.FindByEmailAsync(request.Email);
+            if (existingUser != null)
             {
                 return Result.Failure<RegisterResponse>(
                     "An account with this email already exists",
@@ -41,8 +38,6 @@ namespace Ridged.Application.Features.Auth.Register
             {
                 Email = request.Email,
                 UserName = request.Email,
-                NormalizedEmail = request.Email.ToUpper(),
-                NormalizedUserName = request.Email.ToUpper(),
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Role = UserRole.Customer,
@@ -50,21 +45,31 @@ namespace Ridged.Application.Features.Auth.Register
                 VerificationToken = verificationToken,
                 VerificationTokenExpiryTime = DateTime.UtcNow.AddHours(24),
                 CreatedAt = DateTime.UtcNow,
-                IsActive = true,
-                SecurityStamp = Guid.NewGuid().ToString()
+                IsActive = true
             };
 
-            // Hash password
-            user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+            // Create user with password using UserManager
+            var result = await _userManager.CreateAsync(user, request.Password);
 
-            // Save user
-            await _userRepository.AddAsync(user, cancellationToken);
-            var saved = await _userRepository.SaveChangesAsync(cancellationToken);
-
-            if (!saved)
+            if (!result.Succeeded)
             {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 return Result.Failure<RegisterResponse>(
-                    "Failed to create user account. Please try again",
+                    $"Failed to create user account: {errors}",
+                    400 // Bad Request
+                );
+            }
+
+            // Assign role to user
+            var roleResult = await _userManager.AddToRoleAsync(user, UserRole.Customer.ToString());
+            
+            if (!roleResult.Succeeded)
+            {
+                // Rollback: delete the user if role assignment fails
+                await _userManager.DeleteAsync(user);
+                var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                return Result.Failure<RegisterResponse>(
+                    $"Failed to assign role: {errors}",
                     500 // Internal Server Error
                 );
             }
