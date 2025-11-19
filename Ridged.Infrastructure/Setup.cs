@@ -1,10 +1,6 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Ridged.Domain.Entities;
-using Ridged.Infrastructure.Context;
 using Ridged.Infrastructure.Extensions;
-using Ridged.Infrastructure.Repository;
 
 namespace Ridged.Infrastructure
 {
@@ -15,34 +11,11 @@ namespace Ridged.Infrastructure
             // Register Database
             services.AddDatabase(configuration);
 
-            // Register Identity with enhanced security configuration
-            services.AddIdentity<User, IdentityRole<int>>(options =>
-            {
-                // Password settings
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = true;
+            // Register Identity Services
+            services.AddIdentityServices();
 
-                // Lockout settings
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(60);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
-
-                // User settings
-                options.User.RequireUniqueEmail = true;
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-
-                // Sign-in settings
-                options.SignIn.RequireConfirmedEmail = false; // Set to true in production with email service
-                options.SignIn.RequireConfirmedPhoneNumber = false;
-            })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
-
-            // Register Repositories
-            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            // Register Infrastructure Services (Repositories, JWT, etc.)
+            services.AddInfrastructureServices();
 
             return services;
         }

@@ -1,0 +1,142 @@
+### Ridged API - Authentication Endpoints Testing
+### Base URL
+@baseUrl = http://localhost:5081
+@email = testuser@example.com
+@password = SecurePass123!
+
+###
+### 1. Register a new user
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "confirmPassword": "{{password}}",
+  "firstName": "Test",
+  "lastName": "User"
+}
+
+###
+### 2. Verify Email (Copy token from registration response)
+POST {{baseUrl}}/api/auth/verify-email
+Content-Type: application/json
+
+{
+  "token": "PASTE_VERIFICATION_TOKEN_HERE"
+}
+
+###
+### 3. Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+###
+### 4. Refresh Token (Use tokens from login response)
+POST {{baseUrl}}/api/auth/refresh-token
+Content-Type: application/json
+
+{
+  "accessToken": "PASTE_ACCESS_TOKEN_HERE",
+  "refreshToken": "PASTE_REFRESH_TOKEN_HERE"
+}
+
+###
+### 5. Forgot Password
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "{{email}}"
+}
+
+###
+### 6. Reset Password (Use token from forgot password response)
+POST {{baseUrl}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "PASTE_RESET_TOKEN_HERE",
+  "newPassword": "NewSecurePass123!",
+  "confirmPassword": "NewSecurePass123!"
+}
+
+###
+### Test Cases - Validation Errors
+###
+
+### Invalid Email Format
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "invalid-email",
+  "password": "{{password}}",
+  "confirmPassword": "{{password}}",
+  "firstName": "Test",
+  "lastName": "User"
+}
+
+###
+### Weak Password (missing uppercase)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "another@example.com",
+  "password": "weakpass123!",
+  "confirmPassword": "weakpass123!",
+  "firstName": "Test",
+  "lastName": "User"
+}
+
+###
+### Password Mismatch
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "mismatch@example.com",
+  "password": "{{password}}",
+  "confirmPassword": "DifferentPass123!",
+  "firstName": "Test",
+  "lastName": "User"
+}
+
+###
+### Duplicate Email Registration
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "confirmPassword": "{{password}}",
+  "firstName": "Duplicate",
+  "lastName": "User"
+}
+
+###
+### Login with Unverified Account
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "unverified@example.com",
+  "password": "{{password}}"
+}
+
+###
+### Login with Invalid Credentials
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "WrongPassword123!"
+}
