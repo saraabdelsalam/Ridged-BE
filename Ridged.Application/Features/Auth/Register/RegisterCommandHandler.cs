@@ -30,7 +30,7 @@ namespace Ridged.Application.Features.Auth.Register
                 );
             }
 
-            // Generate verification token
+            // it's sent to user's email to verify their account
             var verificationToken = GenerateVerificationToken();
 
             // Create user

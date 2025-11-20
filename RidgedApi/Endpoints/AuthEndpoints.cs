@@ -5,6 +5,7 @@ using Ridged.Application.Features.Auth.ForgotPassword;
 using Ridged.Application.Features.Auth.ForgotPassword.DTOs;
 using Ridged.Application.Features.Auth.Login;
 using Ridged.Application.Features.Auth.Login.DTOs;
+using Ridged.Application.Features.Auth.Logout;
 using Ridged.Application.Features.Auth.RefreshToken;
 using Ridged.Application.Features.Auth.RefreshToken.DTOs;
 using Ridged.Application.Features.Auth.Register;
@@ -45,6 +46,10 @@ namespace RidgedApi.Endpoints
             group.MapPost("/reset-password", ResetPasswordAsync)
                 .WithName("ResetPassword")
                 .WithDescription("Reset password using token");
+
+            group.MapPost("/logout", LogoutAsync)
+                .WithName("Logout")
+                .WithDescription("Logout the current user");   
         }
 
         private static async Task<IResult> RegisterAsync(
@@ -190,7 +195,38 @@ namespace RidgedApi.Endpoints
 
             return Results.Ok(ApiResponse.SuccessResponse(result.Message, 200));
         }
-    }
 
+        private static async Task<IResult> LogoutAsync(
+            HttpContext httpContext,
+            IMediator mediator,
+            CancellationToken cancellationToken)
+        {
+            // Extract user ID from JWT claims
+            var userIdClaim = httpContext.User?.FindFirst("sub")?.Value 
+                              ?? httpContext.User?.FindFirst("userId")?.Value
+                              ?? httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                var authResponse = ApiResponse.FailureResponse("User not authenticated.", 401);
+                return Results.Json(authResponse, statusCode: 401);
+            }
+
+            var command = new LogoutCommand(userId);
+            var result = await mediator.Send(command, cancellationToken);
+
+            if (!result.IsSuccess)
+            {
+                var response = ApiResponse.FailureResponse(
+                    result.Message,
+                    result.StatusCode
+                );
+                return Results.Json(response, statusCode: result.StatusCode);
+            }
+
+            return Results.Ok(ApiResponse.SuccessResponse(result.Message, 200));
+        }
+    }
+    
     public record VerifyEmailRequest(string Token);
 }
