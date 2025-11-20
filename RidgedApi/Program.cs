@@ -27,7 +27,16 @@ builder.Services.AddApplicationLayer();
 
 // Register Infrastructure Layer (DbContext, Identity, Repositories, JWT Service)
 builder.Services.AddInfrastructureLayer(builder.Configuration);
-
+// enable cors
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 // Configure JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
@@ -77,6 +86,7 @@ using (var scope = app.Services.CreateScope())
     var logger = services.GetRequiredService<ILogger<Program>>();
     await SellerSeeder.SeedAsync(context, userManager, configuration, logger);
 }
+app.UseCors();
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
