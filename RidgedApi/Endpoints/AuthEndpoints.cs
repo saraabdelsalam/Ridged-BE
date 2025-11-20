@@ -33,7 +33,8 @@ namespace RidgedApi.Endpoints
 
             group.MapPost("/login", LoginAsync)
                 .WithName("Login")
-                .WithDescription("Login with email and password");
+                .WithDescription("Login with email and password")
+                .RequireRateLimiting("Fixed");
 
             group.MapPost("/refresh-token", RefreshTokenAsync)
                 .WithName("RefreshToken")
